@@ -1,71 +1,61 @@
-import { useRef, useEffect } from "react";
-import PropTypes from 'prop-types'
+/* eslint-disable react/prop-types */
+import { useEffect } from 'react';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import 'videojs-contrib-eme';
+import 'videojs-contrib-quality-levels';
+import 'videojs-contrib-quality-menu';
+import '@videojs/http-streaming';
+import './App.css'
 
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
+const VideoPlayer = ({src}) => {
 
-export const VideoPlayer = (props) => {
-  const videoRef = useRef(null);
-  const playerRef = useRef(null);
-  const { options, onReady } = props;
-
-  useEffect(() => {
-    // Make sure Video.js player is only initialized once
-    if (!playerRef.current) {
-      // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
-      const videoElement = document.createElement("video-js");
-
-      videoElement.classList.add("vjs-big-play-centered");
-      videoRef.current.appendChild(videoElement);
-
-      const player = (playerRef.current = videojs(videoElement, options, () => {
-        videojs.log("player is ready");
-        onReady && onReady(player);
-      }));
-
-      // You could update an existing player in the `else` block here
-      // on prop change, for example:
-    } else {
-      const player = playerRef.current;
-
-      player.autoplay(options.autoplay);
-      player.src(options.sources);
-    }
-  }, [options, videoRef]);
-
-  // Dispose the Video.js player when the functional component unmounts
-  useEffect(() => {
-    const player = playerRef.current;
-
-    return () => {
-      if (player && !player.isDisposed()) {
-        player.dispose();
-        playerRef.current = null;
-      }
+    const getVideoType = (url) => {
+        const extension = url.split('.').pop();
+        switch (extension) {
+            case 'm3u8':
+                return 'application/x-mpegURL';
+            case 'mpd':
+                return 'application/dash+xml';
+            case 'mp4':
+                return 'video/mp4';
+            default:
+                return 'video/mp4';
+        }
     };
-  }, [playerRef]);
 
-  return (
-    <div
-      data-vjs-player
-      style={{ width: "800px", height: "500px" }}
-    >
-      <div ref={videoRef} />
-    </div>
-  );
-};
+    useEffect(() => {
+        const player = videojs("player", {
+            muted: false,
+            autoplay: false,
+            preload: "auto",
+            controls: true,
+            responsive: true,
+            fluid: true,
+            plugins: {
+                eme: { /* EME configuration */ },
+                qualityLevels: {},
+                qualityMenu: {},
+            }
+            });
+        player.src({
+            src: src,
+            type: getVideoType(src),
+        });
 
-VideoPlayer.propTypes = {
-  options: PropTypes.shape({
-    autoplay: PropTypes.bool,
-    sources: PropTypes.arrayOf(
-      PropTypes.shape({
-        src: PropTypes.string.isRequired,
-        type: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
-  onReady: PropTypes.func,
+    }, [src]);
+
+    return (
+        <div className='videoPlayer'>
+            <video
+                id='player'
+                className="video-js vjs-default-skin"
+                controls
+                playsInline
+                preload="auto">
+            </video>
+        </div>
+    );
 };
 
 export default VideoPlayer;

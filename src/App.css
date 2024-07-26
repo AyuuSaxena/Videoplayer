@@ -1,15 +1,27 @@
-#root{
-  width: 100%;
+.App{
+  width: 100vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
+
 .field{
-  margin: 15px;
+  margin-bottom: 20px;
+  font-size: 20px;
 }
 
 .field input{
   height: 25px;
-  font-size: 18px;
+  width: 35vw;
+  font-size: 16px;
+}
+
+.videoPlayer{
+  width: 60%;
+}
+
+.vjs-quality-menu-item-sub-label{
+  position: absolute;
+  right: 10px;
 }
